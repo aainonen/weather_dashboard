@@ -1,0 +1,13 @@
+<!-- templates/index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Weather Dashboard</title>
+</head>
+<body>
+    <h1>Weather in Helsinki</h1>
+    <pre>{{ weather | tojson(indent=2) }}</pre>
+</body>
+</html>
