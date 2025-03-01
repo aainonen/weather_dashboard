@@ -1,13 +1,54 @@
-<!-- templates/index.html -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Weather Dashboard</title>
+  <meta charset="UTF-8">
+  <title>Weather Dashboard</title>
+  <style>
+      body {
+          font-family: Arial, sans-serif;
+          margin: 2em;
+          background-color: #f2f2f2;
+      }
+      .weather-container {
+          background-color: #fff;
+          padding: 20px;
+          border-radius: 8px;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          max-width: 500px;
+          margin: auto;
+      }
+      .weather-icon {
+          vertical-align: middle;
+      }
+      h1 {
+          text-align: center;
+      }
+      .weather-details {
+          margin-top: 20px;
+      }
+  </style>
 </head>
 <body>
-    <h1>Weather in Helsinki</h1>
-    <pre>{{ weather | tojson(indent=2) }}</pre>
+  <div class="weather-container">
+    {% if weather.error %}
+      <h1>Error</h1>
+      <p>{{ weather.error }}</p>
+    {% else %}
+      <h1>Weather in {{ weather.name or "Helsinki" }}</h1>
+      {% set main_data = weather.main %}
+      {% set weather_info = weather.weather[0] if weather.weather is defined and weather.weather|length > 0 else {} %}
+      <div class="weather-details">
+         <p><strong>Temperature:</strong> {{ main_data.temp }} °C</p>
+         <p><strong>Feels like:</strong> {{ main_data.feels_like }} °C</p>
+         <p><strong>Condition:</strong> {{ weather_info.description|capitalize }}</p>
+         <p><strong>Humidity:</strong> {{ main_data.humidity }} %</p>
+         <p><strong>Wind Speed:</strong> {{ weather.wind.speed }} m/s</p>
+         {% if weather_info.icon %}
+            <img src="https://openweathermap.org/img/wn/{{ weather_info.icon }}@2x.png" alt="Weather icon" class="weather-icon">
+         {% endif %}
+      </div>
+    {% endif %}
+  </div>
 </body>
 </html>
+
