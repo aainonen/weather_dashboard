@@ -1,7 +1,6 @@
-# weather/api.py
-
 import requests
 from flask import current_app
+import logging
 
 def fetch_weather():
     api_url = "https://api.openweathermap.org/data/2.5/weather"
@@ -15,5 +14,7 @@ def fetch_weather():
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
-        # Here, you could also add logging
+        # Log the error
+        logging.error("Failed to fetch weather data: %s", e)
         return {"error": str(e)}
+
