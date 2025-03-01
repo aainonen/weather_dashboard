@@ -16,6 +16,7 @@ This project uses [pytest](https://pytest.org/) to run tests for both API functi
 
 ## Running Tests
 Simply running "pytest" will automatically discover tests in the tests directory:
+
 ``
 pytest
 ``
