@@ -15,11 +15,11 @@ This project uses [pytest](https://pytest.org/) to run tests for both API functi
    export PYTHONPATH=.
 
 ## Running Tests
-Simply run:
-   ```bash
-   pytest
+Simply running "pytest" will automatically discover tests in the tests directory:
+``
+pytest
+``
 
-This command will automatically discover tests in the tests/directory
 
 ## Testing Strategy
 
