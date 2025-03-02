@@ -17,15 +17,14 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: 3.9
+        python-version: '3.9'
 
     - name: Install dependencies
       run: |
         python -m venv venv
         source venv/bin/activate
-        pip install --upgrade pip
-        pip install -r requirements.txt
-        # Optionally install linters like flake8:
+        pip install --upgrade pip setuptools wheel
+        pip install -r requirements.txt --retries 5 --timeout 30
         pip install flake8
 
     - name: Lint code with flake8
@@ -42,12 +41,3 @@ jobs:
     - name: Build Docker image
       run: docker build -t weather_dashboard .
 
-    # Optionally, you can push the Docker image to a registry (e.g., Docker Hub)
-    # - name: Log in to Docker Hub
-    #   uses: docker/login-action@v2
-    #   with:
-    #     username: ${{ secrets.DOCKER_HUB_USERNAME }}
-    #     password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-    #
-    # - name: Push Docker image
-    #   run: docker push weather_dashboard
