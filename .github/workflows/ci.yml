@@ -32,7 +32,7 @@ jobs:
     - name: Lint code with flake8
       run: |
         source venv/bin/activate
-        flake8 .
+        flake8 --exclude=venv .
 
     - name: Run tests with pytest
       run: |
