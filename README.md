@@ -79,6 +79,21 @@ The project is fully containerized. To build and run the app in Docker:
 Docker Compose will automatically load environment variables from your .env file.
 The app will be accessible at http://localhost:8000.
 
+## Continuous Integration
+
+This project uses [GitHub Actions](https://github.com/features/actions) to automatically run tests and quality checks on every push and pull request. The CI pipeline includes:
+
+- **Dependency Installation:**
+  A virtual environment is created and all required packages are installed.
+- **Code Linting:**
+  The code is checked with [flake8](https://flake8.pycqa.org/) to ensure it meets PEP8 guidelines.
+- **Testing:**
+  Unit tests are executed with [pytest](https://pytest.org/).
+- **Docker Builds:**
+  The project’s Docker image is built, and tests are run inside a container to ensure that the application works in its production environment.
+  
+This automated process helps catch errors early and maintains a high quality codebase.
+
 ## Testing
 This project uses [pytest](https://pytest.org/) for testing. To run tests locally:
 1. Activate your virtual environment.
