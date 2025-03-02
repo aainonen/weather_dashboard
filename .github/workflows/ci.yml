@@ -52,5 +52,5 @@ jobs:
 
       - name: Run tests in Docker container
         run: |
-          docker run --env-file test.env weather_dashboard_test pytest
+          docker run --env-file test.env -e PYTHONPATH=/app weather_dashboard_test pytest
 
