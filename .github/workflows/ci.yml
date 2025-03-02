@@ -25,7 +25,7 @@ jobs:
         source venv/bin/activate
         pip install --upgrade pip setuptools wheel
         for i in {1..10}; do 
-          pip install -r requirements.txt -i https://pypi.org/simple && break || sleep 15; 
+          pip install -r requirements.txt -i https://pypi.org/simple && break || (pip freeze && sleep 15); 
         done
         pip install flake8
 
@@ -43,7 +43,6 @@ jobs:
     - name: Build Docker image for app
       run: docker build -t weather_dashboard .
 
-    # ---- Extra steps to run tests inside Docker using secret ----
     - name: Write test.env file
       run: |
         echo "OPENWEATHER_API_KEY=${{ secrets.OPENWEATHER_API_KEY }}" > test.env
@@ -54,4 +53,3 @@ jobs:
     - name: Run tests in Docker container
       run: |
         docker run --env-file test.env weather_dashboard_test pytest
-
