@@ -24,7 +24,9 @@ jobs:
         python -m venv venv
         source venv/bin/activate
         pip install --upgrade pip setuptools wheel
-        pip install -r requirements.txt --retries 5 --timeout 30
+        for i in 1 2 3 4 5; do 
+          pip install -r requirements.txt && break || sleep 15; 
+        done
         pip install flake8
 
     - name: Lint code with flake8
@@ -38,6 +40,18 @@ jobs:
         export PYTHONPATH=.
         pytest
 
-    - name: Build Docker image
+    - name: Build Docker image for app
       run: docker build -t weather_dashboard .
+
+    # ---- Extra steps to run tests inside Docker using secret ----
+    - name: Write test.env file
+      run: |
+        echo "OPENWEATHER_API_KEY=${{ secrets.OPENWEATHER_API_KEY }}" > test.env
+
+    - name: Build Docker image for tests
+      run: docker build -t weather_dashboard_test .
+
+    - name: Run tests in Docker container
+      run: |
+        docker run --env-file test.env weather_dashboard_test pytest
 
