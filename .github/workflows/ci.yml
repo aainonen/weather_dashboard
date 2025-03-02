@@ -11,45 +11,46 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
 
-    - name: Install dependencies
-      run: |
-        python -m venv venv
-        source venv/bin/activate
-        pip install --upgrade pip setuptools wheel
-        for i in {1..10}; do 
-          pip install -r requirements.txt -i https://pypi.org/simple && break || (pip freeze && sleep 15); 
-        done
-        pip install flake8
+      - name: Install dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip setuptools wheel
+          for i in {1..10}; do 
+            pip install -r requirements.txt -i https://pypi.org/simple && break || (pip freeze && sleep 15); 
+          done
+          pip install flake8
 
-    - name: Lint code with flake8
-      run: |
-        source venv/bin/activate
-        flake8 --exclude=venv .
+      - name: Lint code with flake8
+        run: |
+          source venv/bin/activate
+          flake8
 
-    - name: Run tests with pytest
-      run: |
-        source venv/bin/activate
-        export PYTHONPATH=.
-        pytest
+      - name: Run tests with pytest
+        run: |
+          source venv/bin/activate
+          export PYTHONPATH=.
+          pytest
 
-    - name: Build Docker image for app
-      run: docker build -t weather_dashboard .
+      - name: Build Docker image for app
+        run: docker build -t weather_dashboard .
 
-    - name: Write test.env file
-      run: |
-        echo "OPENWEATHER_API_KEY=${{ secrets.OPENWEATHER_API_KEY }}" > test.env
+      - name: Write test.env file
+        run: |
+          echo "OPENWEATHER_API_KEY=${{ secrets.OPENWEATHER_API_KEY }}" > test.env
 
-    - name: Build Docker image for tests
-      run: docker build -t weather_dashboard_test .
+      - name: Build Docker image for tests
+        run: docker build -t weather_dashboard_test .
 
-    - name: Run tests in Docker container
-      run: |
-        docker run --env-file test.env weather_dashboard_test pytest
+      - name: Run tests in Docker container
+        run: |
+          docker run --env-file test.env weather_dashboard_test pytest
+
