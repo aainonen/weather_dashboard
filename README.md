@@ -30,21 +30,23 @@ The Weather Dashboard is a lightweight web application built with Flask. It fetc
    source venv/bin/activate
 
 3. **Install dependencies:**
-   ```bash
+   ``
    pip install -r requirements.txt
-
+   ``
 
 ## Configuration
 Before running the app, set your OpenWeatherMap API key as an environment variable. You can do this by running:
-   ```bash
+   ``
    export OPENWEATHER_API_KEY=your_actual_api_key_here
+   ``
 
 Alternatively, create a .env file and use a tool like python-dotenv to load your configuration.
 
 ## Running the Application
 To start the Flask web app locally, run:
-   ```bash
+   ``
    python app.py
+   ``
    
 By default, the app will be available at http://127.0.0.1:5000.
 
