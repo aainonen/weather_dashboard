@@ -24,8 +24,8 @@ jobs:
         python -m venv venv
         source venv/bin/activate
         pip install --upgrade pip setuptools wheel
-        for i in 1 2 3 4 5; do 
-          pip install -r requirements.txt && break || sleep 15; 
+        for i in {1..10}; do 
+          pip install -r requirements.txt -i https://pypi.org/simple && break || sleep 15; 
         done
         pip install flake8
 
