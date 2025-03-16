@@ -10,6 +10,30 @@ jobs:
   build-test:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_USER: ${{ secrets.DB_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.DB_NAME }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ${{ secrets.DB_USER }} -d ${{ secrets.DB_NAME }}"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_NAME: ${{ secrets.DB_NAME }}
+      OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
+      DEBUG: "True"
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -46,6 +70,11 @@ jobs:
       - name: Write test.env file
         run: |
           echo "OPENWEATHER_API_KEY=${{ secrets.OPENWEATHER_API_KEY }}" > test.env
+          echo "DB_USER=${{ secrets.DB_USER }}" >> test.env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> test.env
+          echo "DB_HOST=localhost" >> test.env
+          echo "DB_PORT=5432" >> test.env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> test.env
 
       - name: Build Docker image for tests
         run: docker build -t weather_dashboard_test .
