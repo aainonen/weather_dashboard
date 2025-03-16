@@ -10,6 +10,7 @@ jobs:
   build-test:
     runs-on: ubuntu-latest
 
+    # Job-level environment variables using repository secrets.
     env:
       DB_USER: ${{ secrets.DB_USER }}
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
@@ -23,13 +24,14 @@ jobs:
       postgres:
         image: postgres:13
         env:
-          POSTGRES_USER: "${{ env.DB_USER }}"
-          POSTGRES_PASSWORD: "${{ env.DB_PASSWORD }}"
-          POSTGRES_DB: "${{ env.DB_NAME }}"
+          # Use literal values here; these should match the secrets you defined.
+          POSTGRES_USER: oem
+          POSTGRES_PASSWORD: mypassword
+          POSTGRES_DB: weather_dashboard_db
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U ${{ env.DB_USER }} -d ${{ env.DB_NAME }}"
+          --health-cmd "pg_isready -U oem -d weather_dashboard_db"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
