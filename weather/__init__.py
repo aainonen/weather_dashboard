@@ -1,33 +1,45 @@
-from flask import Flask
-from config import Config
-from weather.views import main_blueprint
+# weather/__init__.py
+
 import logging
 import os
 import glob
 from datetime import datetime
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from config import Config
+from .views import main_blueprint
 
-def create_app():
-    app = Flask(__name__, template_folder='templates')
-    app.config.from_object(Config)
-    app.register_blueprint(main_blueprint)
+db = SQLAlchemy()
 
-    # Set up a dedicated logs directory
+def configure_logging():
     LOG_DIR = 'logs'
     if not os.path.exists(LOG_DIR):
         os.makedirs(LOG_DIR)
 
-    # Create a unique log filename for the current session using a timestamp
     session_log_file = os.path.join(LOG_DIR, f"app_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log")
 
-    # Configure logging to output to the session log file
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s %(levelname)s: %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S',
-        filename=session_log_file
-    )
+    # Create a file handler
+    file_handler = logging.FileHandler(session_log_file)
+    file_handler.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+    file_handler.setFormatter(formatter)
 
-    # Function to clean up old log files, keeping only the latest 30 sessions
+    # Get the root logger and add the file handler if not already added
+    root_logger = logging.getLogger()
+
+    # Remove existing handlers to avoid duplicates
+    if root_logger.hasHandlers():
+        root_logger.handlers.clear()
+
+    root_logger.setLevel(logging.INFO)
+    root_logger.addHandler(file_handler)
+
+    # Optional: Also log to console for debugging
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(formatter)
+    root_logger.addHandler(console_handler)
+
+    # Cleanup old logs
     def cleanup_old_logs(max_logs=30):
         log_files = sorted(glob.glob(os.path.join(LOG_DIR, "app_*.log")))
         while len(log_files) > max_logs:
@@ -35,6 +47,23 @@ def create_app():
             log_files.pop(0)
 
     cleanup_old_logs()
+
+def create_app():
+    app = Flask(__name__, template_folder='templates')
+    app.config.from_object(Config)
+
+    # Initialize SQLAlchemy
+    db.init_app(app)
+
+    # Register the main blueprint
+    app.register_blueprint(main_blueprint)
+
+    # Register session logging hooks
+    from . import session_logging
+    session_logging.register_session_logging(app)
+
+    # Configure logging explicitly
+    configure_logging()
 
     return app
 
