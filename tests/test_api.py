@@ -1,4 +1,3 @@
-import json
 import requests
 import pytest
 from weather import create_app
@@ -7,16 +6,19 @@ from weather.api import fetch_weather
 def dummy_weather_data():
     """Dummy data to simulate a successful API call."""
     return {
-        "name": "Helsinki",
-        "main": {
-            "temp": 10,
-            "feels_like": 8,
-            "humidity": 75
-        },
-        "weather": [
-            {"description": "clear sky", "icon": "01d"}
-        ],
-        "wind": {"speed": 5}
+        "status": "success",
+        "data": {
+            "name": "Helsinki",
+            "main": {
+                "temp": 10,
+                "feels_like": 8,
+                "humidity": 75
+            },
+            "weather": [
+                {"description": "clear sky", "icon": "01d"}
+            ],
+            "wind": {"speed": 5}
+        }
     }
 
 class DummyResponse:
@@ -56,15 +58,15 @@ def test_index(monkeypatch, client):
     assert "Weather in Helsinki" in html
     assert "10 °C" in html  # This should now pass if the dummy data is used.
 
-def dummy_get_success(url, params):
+def dummy_get_success(*args, **kwargs):
     """
     Dummy replacement for requests.get to simulate a successful API response.
     """
     return DummyResponse({
-        "name": "Helsinki",
         "main": {"temp": 12, "feels_like": 11, "humidity": 80},
         "weather": [{"description": "cloudy", "icon": "02d"}],
-        "wind": {"speed": 4}
+        "wind": {"speed": 4},
+        "name": "Helsinki"
     }, 200)
 
 def test_fetch_weather_success(monkeypatch, app):
@@ -75,12 +77,12 @@ def test_fetch_weather_success(monkeypatch, app):
     monkeypatch.setattr(requests, "get", dummy_get_success)
     with app.app_context():
         data = fetch_weather()
-        assert "name" in data
-        assert data["name"] == "Helsinki"
-        assert "main" in data
-        assert data["main"]["temp"] == 12
+        assert data["status"] == "success"
+        assert "data" in data
+        assert data["data"]["name"] == "Helsinki"
+        assert data["data"]["main"]["temp"] == 12
 
-def dummy_get_failure(url, params):
+def dummy_get_failure(*args, **kwargs):
     """
     Dummy replacement for requests.get to simulate an API failure.
     """
@@ -93,6 +95,5 @@ def test_fetch_weather_failure(monkeypatch, app):
     monkeypatch.setattr(requests, "get", dummy_get_failure)
     with app.app_context():
         data = fetch_weather()
-        assert "error" in data
-        assert "API failure simulated" in data["error"]
-
+        assert data["status"] == "error"
+        assert "API failure simulated" in data["message"]
