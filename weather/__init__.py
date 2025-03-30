@@ -4,9 +4,10 @@ import logging
 import os
 import glob
 from datetime import datetime
-from flask import Flask
+from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
+from .extensions import limiter  # Import limiter from extensions.py
 from .views import main_blueprint
 
 db = SQLAlchemy()
@@ -55,6 +56,9 @@ def create_app():
     # Initialize SQLAlchemy
     db.init_app(app)
 
+    # Initialize Flask-Limiter
+    limiter.init_app(app)
+
     # Register the main blueprint
     app.register_blueprint(main_blueprint)
 
@@ -64,6 +68,21 @@ def create_app():
 
     # Configure logging explicitly
     configure_logging()
+
+    @app.after_request
+    def add_security_headers(response):
+        # Add a Content Security Policy (CSP) header
+        response.headers['Content-Security-Policy'] = (
+            "default-src 'self'; "  # Allow content only from the same origin
+            "img-src 'self' https://openweathermap.org; "  # Allow images from OpenWeatherMap
+            "script-src 'self'; "  # Allow scripts only from the same origin
+            "style-src 'self'; "  # Allow styles only from the same origin
+        )
+        return response
+
+    @app.errorhandler(413)
+    def request_entity_too_large(error):
+        return render_template('error.html', message="The request is too large. Please try again with a smaller payload."), 413
 
     return app
 

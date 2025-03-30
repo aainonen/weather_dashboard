@@ -12,3 +12,9 @@ class Config:
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    # Limit request body size to 1 MB
+    MAX_CONTENT_LENGTH = 1 * 1024 * 1024  # 1 MB
+
+    SESSION_COOKIE_SECURE = True  # Only send cookies over HTTPS
+    SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access to cookies
+    SESSION_COOKIE_SAMESITE = 'Lax'  # Prevent CSRF in cross-site contexts

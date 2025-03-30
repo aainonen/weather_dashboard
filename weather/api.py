@@ -4,13 +4,7 @@ import logging
 
 def fetch_weather(city='Helsinki'):
     """
-    Fetch weather data for a given city using the OpenWeatherMap API.
-
-    Args:
-        city (str): The name of the city to fetch weather for. Defaults to 'Helsinki'.
-
-    Returns:
-        dict: JSON response containing weather data or an error message.
+    Fetch current weather data for a given city using the OpenWeatherMap API.
     """
     api_url = "https://api.openweathermap.org/data/2.5/weather"
     api_key = current_app.config.get('OPENWEATHER_API_KEY')
@@ -27,8 +21,21 @@ def fetch_weather(city='Helsinki'):
 
     try:
         response = requests.get(api_url, params=params, timeout=10)
-        response.raise_for_status()
+        response.raise_for_status()  # Raise an HTTPError for bad responses (4xx and 5xx)
+
+        # If the response is successful, return the weather data
         return {"status": "success", "data": response.json()}
-    except requests.exceptions.RequestException as e:
-        logging.error("Failed to fetch weather data for %s: %s", city, e)
-        return {"status": "error", "message": str(e)}
+
+    except requests.exceptions.HTTPError as http_err:
+        # Handle specific HTTP errors
+        if response.status_code == 404:
+            logging.error("City not found: %s", city)
+            return {"status": "error", "message": f"City '{city}' not found. Please check the spelling."}
+        else:
+            logging.error("HTTP error occurred: %s", http_err)
+            return {"status": "error", "message": "An error occurred while fetching weather data. Please try again later."}
+
+    except requests.exceptions.RequestException as req_err:
+        # Handle other request-related errors
+        logging.error("Request error occurred: %s", req_err)
+        return {"status": "error", "message": "Failed to fetch weather data. Please check your connection and try again."}

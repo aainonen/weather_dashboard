@@ -43,20 +43,33 @@ def app():
 def client(app):
     return app.test_client()
 
-def test_index(monkeypatch, client):
+def test_index_success(monkeypatch, client):
     """
-    Test the index route of the Flask app.
-    Monkeypatch fetch_weather in the views module to return dummy weather data.
+    Test the index route of the Flask app for a successful response.
     """
-    monkeypatch.setattr("weather.views.fetch_weather", lambda: dummy_weather_data())
+    monkeypatch.setattr("weather.views.fetch_weather", lambda city="Helsinki": dummy_weather_data())
 
-    response = client.get('/')
+    response = client.get('/?city=Helsinki')
     assert response.status_code == 200
 
     html = response.data.decode('utf-8')
     # Check that the template rendered the expected content.
     assert "Weather in Helsinki" in html
-    assert "10 °C" in html  # This should now pass if the dummy data is used.
+    assert "10 °C" in html
+
+def test_index_error(monkeypatch, client):
+    """
+    Test the index route of the Flask app for an error response.
+    """
+    monkeypatch.setattr("weather.views.fetch_weather", lambda city="InvalidCity": {"status": "error", "message": "City not found."})
+
+    response = client.get('/?city=InvalidCity')
+    assert response.status_code == 200
+
+    html = response.data.decode('utf-8')
+    # Check that the template rendered the error message.
+    assert "Error" in html
+    assert "City not found." in html
 
 def dummy_get_success(*args, **kwargs):
     """
@@ -72,11 +85,10 @@ def dummy_get_success(*args, **kwargs):
 def test_fetch_weather_success(monkeypatch, app):
     """
     Test the fetch_weather function for a successful API call.
-    Use monkeypatch to override requests.get with dummy_get_success.
     """
     monkeypatch.setattr(requests, "get", dummy_get_success)
     with app.app_context():
-        data = fetch_weather()
+        data = fetch_weather("Helsinki")
         assert data["status"] == "success"
         assert "data" in data
         assert data["data"]["name"] == "Helsinki"
@@ -94,6 +106,19 @@ def test_fetch_weather_failure(monkeypatch, app):
     """
     monkeypatch.setattr(requests, "get", dummy_get_failure)
     with app.app_context():
-        data = fetch_weather()
+        data = fetch_weather("InvalidCity")
         assert data["status"] == "error"
-        assert "API failure simulated" in data["message"]
+        assert "Failed to fetch weather data. Please check your connection and try again." in data["message"]
+
+def test_fetch_weather_city_not_found(monkeypatch, app):
+    """
+    Test the fetch_weather function for a 404 city not found error.
+    """
+    def dummy_get_404(*args, **kwargs):
+        return DummyResponse({"message": "city not found"}, 404)
+
+    monkeypatch.setattr(requests, "get", dummy_get_404)
+    with app.app_context():
+        data = fetch_weather("NonExistentCity")
+        assert data["status"] == "error"
+        assert "City 'NonExistentCity' not found" in data["message"]
