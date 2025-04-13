@@ -40,11 +40,19 @@ def fetch_weather(city='Helsinki'):
         }, timeout=10)
         forecast_response.raise_for_status()
         forecast_data = forecast_response.json()
+        logging.debug("Forecast data received: %s", forecast_data)
 
         # Ensure the response contains the required keys
-        if "list" not in forecast_data:
-            logging.error("Invalid forecast data received from API.")
+        if "list" not in forecast_data or not isinstance(forecast_data["list"], list):
+            logging.error("Invalid forecast data received from API: 'list' key missing or invalid.")
             return {"status": "error", "message": "Invalid forecast data received from API."}
+
+        # Validate the structure of each entry in the forecast list
+        required_keys = {"dt_txt", "main", "weather", "wind"}
+        for entry in forecast_data["list"]:
+            if not required_keys.issubset(entry.keys()):
+                logging.error("Invalid forecast entry in API response: %s", entry)
+                return {"status": "error", "message": "Invalid forecast data received from API."}
 
         # --- 3) Time zone: Europe/Helsinki ---
         helsinki_tz = pytz.timezone("Europe/Helsinki")
