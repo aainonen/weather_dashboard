@@ -3,57 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <title>Weather Dashboard</title>
-  <style>
-      body {
-          font-family: Arial, sans-serif;
-          margin: 2em;
-          background-color: #f2f2f2;
-      }
-      .weather-container {
-          background-color: #fff;
-          padding: 20px;
-          border-radius: 8px;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-          max-width: 500px;
-          margin: auto;
-      }
-      .weather-icon {
-          vertical-align: middle;
-      }
-      h1 {
-          text-align: center;
-      }
-      .weather-details {
-          margin-top: 20px;
-      }
-      .search-form {
-          margin-bottom: 20px;
-          text-align: center;
-      }
-      .search-form input {
-          padding: 10px;
-          font-size: 16px;
-          width: 70%;
-          border: 1px solid #ccc;
-          border-radius: 4px;
-      }
-      .search-form button {
-          padding: 10px 20px;
-          font-size: 16px;
-          background-color: #007BFF;
-          color: white;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-      }
-      .search-form button:hover {
-          background-color: #0056b3;
-      }
-  </style>
+  <!-- Link to your static stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
   <div class="weather-container">
-    <!-- Add the search form here -->
+    <!-- Search Form -->
     <form class="search-form" method="GET" action="/">
       <input type="text" name="city" placeholder="Enter city name" maxlength="50" required>
       <button type="submit">Get Weather</button>
@@ -62,17 +17,70 @@
     {% if weather.status == "error" %}
       <h1>Error</h1>
       <p>{{ weather.message }}</p>
+
     {% elif weather.status == "success" %}
-      <h1>Weather in {{ weather.data.name or "Helsinki" }}</h1>
-      <div class="weather-details">
-         <p><strong>Temperature:</strong> {{ weather.data.main.temp }} °C</p>
-         <p><strong>Feels like:</strong> {{ weather.data.main.feels_like }} °C</p>
-         <p><strong>Condition:</strong> {{ weather.data.weather[0].description|capitalize }}</p>
-         <p><strong>Humidity:</strong> {{ weather.data.main.humidity }} %</p>
-         <p><strong>Wind Speed:</strong> {{ weather.data.wind.speed }} m/s</p>
-         {% if weather.data.weather[0].icon %}
-            <img src="https://openweathermap.org/img/wn/{{ weather.data.weather[0].icon }}@2x.png" alt="Weather icon" class="weather-icon">
-         {% endif %}
+      <h1>Weather in {{ weather.current.name or "Helsinki" }}</h1>
+
+      <!-- Today's Weather -->
+      <h2>Today's Weather - {{ weather.today_date_str }}</h2>
+      <div class="weather-row">
+        {% for forecast in weather.today %}
+          {% if forecast %}
+            <div class="weather-item">
+              <h3>{{ forecast.time }}</h3>
+              <p><strong>Temperature:</strong> {{ forecast.data.main.temp }} °C</p>
+              <p><strong>Condition:</strong> {{ forecast.data.weather[0].description|capitalize }}</p>
+              <p><strong>Wind Speed:</strong> {{ forecast.data.wind.speed }} m/s</p>
+              {% if forecast.data.weather[0].icon %}
+                <img src="https://openweathermap.org/img/wn/{{ forecast.data.weather[0].icon }}@2x.png" 
+                     alt="Weather icon" class="weather-icon">
+              {% endif %}
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      <!-- Tomorrow's Weather -->
+      <h2>Tomorrow's Weather - {{ weather.tomorrow_date_str }}</h2>
+      <div class="weather-row">
+        {% if weather.tomorrow.upper_row %}
+          {% for forecast in weather.tomorrow.upper_row %}
+            {% if forecast %}
+              <div class="weather-item">
+                <h3>{{ forecast.time }}</h3>
+                <p><strong>Temperature:</strong> {{ forecast.data.main.temp }} °C</p>
+                <p><strong>Condition:</strong> {{ forecast.data.weather[0].description|capitalize }}</p>
+                <p><strong>Wind Speed:</strong> {{ forecast.data.wind.speed }} m/s</p>
+                {% if forecast.data.weather[0].icon %}
+                  <img src="https://openweathermap.org/img/wn/{{ forecast.data.weather[0].icon }}@2x.png" 
+                       alt="Weather icon" class="weather-icon">
+                {% endif %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        {% else %}
+          <p>No data available for the upper row of tomorrow's weather.</p>
+        {% endif %}
+      </div>
+      <div class="weather-row">
+        {% if weather.tomorrow.lower_row %}
+          {% for forecast in weather.tomorrow.lower_row %}
+            {% if forecast %}
+              <div class="weather-item">
+                <h3>{{ forecast.time }}</h3>
+                <p><strong>Temperature:</strong> {{ forecast.data.main.temp }} °C</p>
+                <p><strong>Condition:</strong> {{ forecast.data.weather[0].description|capitalize }}</p>
+                <p><strong>Wind Speed:</strong> {{ forecast.data.wind.speed }} m/s</p>
+                {% if forecast.data.weather[0].icon %}
+                  <img src="https://openweathermap.org/img/wn/{{ forecast.data.weather[0].icon }}@2x.png" 
+                       alt="Weather icon" class="weather-icon">
+                {% endif %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        {% else %}
+          <p>No data available for the lower row of tomorrow's weather.</p>
+        {% endif %}
       </div>
     {% endif %}
   </div>

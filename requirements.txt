@@ -30,6 +30,7 @@ pyflakes==3.2.0
 Pygments==2.19.1
 pytest==8.3.4
 python-dotenv==1.0.1
+pytz==2025.2
 requests==2.32.3
 rich==13.9.4
 SQLAlchemy==2.0.38
