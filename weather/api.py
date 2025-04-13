@@ -27,6 +27,11 @@ def fetch_weather(city='Helsinki'):
         current_response.raise_for_status()
         current_weather = current_response.json()
 
+        # Ensure the response contains the required keys
+        if not all(key in current_weather for key in ["name", "main", "weather", "wind"]):
+            logging.error("Invalid current weather data received from API.")
+            return {"status": "error", "message": "Invalid current weather data received from API."}
+
         # --- 2) 5-day forecast (3-hour increments) ---
         forecast_response = requests.get(forecast_url, params={
             'q': city,
@@ -35,6 +40,11 @@ def fetch_weather(city='Helsinki'):
         }, timeout=10)
         forecast_response.raise_for_status()
         forecast_data = forecast_response.json()
+
+        # Ensure the response contains the required keys
+        if "list" not in forecast_data:
+            logging.error("Invalid forecast data received from API.")
+            return {"status": "error", "message": "Invalid forecast data received from API."}
 
         # --- 3) Time zone: Europe/Helsinki ---
         helsinki_tz = pytz.timezone("Europe/Helsinki")
@@ -99,6 +109,11 @@ def fetch_weather(city='Helsinki'):
         }
 
     except requests.exceptions.HTTPError as http_err:
+        if current_response.status_code == 404:
+            return {
+                "status": "error",
+                "message": f"City '{city}' not found. Please check the city name and try again."
+            }
         logging.error("HTTP error occurred: %s", http_err)
         return {
             "status": "error",

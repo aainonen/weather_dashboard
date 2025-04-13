@@ -28,9 +28,9 @@
           {% if forecast %}
             <div class="weather-item">
               <h3>{{ forecast.time }}</h3>
-              <p><strong>Temperature:</strong> {{ forecast.data.main.temp }} °C</p>
-              <p><strong>Condition:</strong> {{ forecast.data.weather[0].description|capitalize }}</p>
-              <p><strong>Wind Speed:</strong> {{ forecast.data.wind.speed }} m/s</p>
+              <p><strong>Temperature:</strong> {{ forecast.data.main.temp or "N/A" }} °C</p>
+              <p><strong>Condition:</strong> {{ forecast.data.weather[0].description|default("N/A")|capitalize }}</p>
+              <p><strong>Wind Speed:</strong> {{ forecast.data.wind.speed|default("N/A") }} m/s</p>
               {% if forecast.data.weather[0].icon %}
                 <img src="https://openweathermap.org/img/wn/{{ forecast.data.weather[0].icon }}@2x.png" 
                      alt="Weather icon" class="weather-icon">
@@ -48,9 +48,9 @@
             {% if forecast %}
               <div class="weather-item">
                 <h3>{{ forecast.time }}</h3>
-                <p><strong>Temperature:</strong> {{ forecast.data.main.temp }} °C</p>
-                <p><strong>Condition:</strong> {{ forecast.data.weather[0].description|capitalize }}</p>
-                <p><strong>Wind Speed:</strong> {{ forecast.data.wind.speed }} m/s</p>
+                <p><strong>Temperature:</strong> {{ forecast.data.main.temp or "N/A" }} °C</p>
+                <p><strong>Condition:</strong> {{ forecast.data.weather[0].description|default("N/A")|capitalize }}</p>
+                <p><strong>Wind Speed:</strong> {{ forecast.data.wind.speed|default("N/A") }} m/s</p>
                 {% if forecast.data.weather[0].icon %}
                   <img src="https://openweathermap.org/img/wn/{{ forecast.data.weather[0].icon }}@2x.png" 
                        alt="Weather icon" class="weather-icon">
@@ -68,9 +68,9 @@
             {% if forecast %}
               <div class="weather-item">
                 <h3>{{ forecast.time }}</h3>
-                <p><strong>Temperature:</strong> {{ forecast.data.main.temp }} °C</p>
-                <p><strong>Condition:</strong> {{ forecast.data.weather[0].description|capitalize }}</p>
-                <p><strong>Wind Speed:</strong> {{ forecast.data.wind.speed }} m/s</p>
+                <p><strong>Temperature:</strong> {{ forecast.data.main.temp or "N/A" }} °C</p>
+                <p><strong>Condition:</strong> {{ forecast.data.weather[0].description|default("N/A")|capitalize }}</p>
+                <p><strong>Wind Speed:</strong> {{ forecast.data.wind.speed|default("N/A") }} m/s</p>
                 {% if forecast.data.weather[0].icon %}
                   <img src="https://openweathermap.org/img/wn/{{ forecast.data.weather[0].icon }}@2x.png" 
                        alt="Weather icon" class="weather-icon">
