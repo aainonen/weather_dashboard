@@ -1,0 +1,3 @@
+kotikulmankeli.cloud {
+    reverse_proxy weather_dashboard:8000
+}

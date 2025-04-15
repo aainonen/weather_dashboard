@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  caddy:
+    image: caddy:2
+    container_name: caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - weather_dashboard
+    networks:
+      - app_net
+
+volumes:
+  caddy_data:
+  caddy_config:
