@@ -4,48 +4,58 @@ import re
 import logging
 from flask import Blueprint, render_template, request, current_app, g
 from .api import fetch_weather
-from .extensions import limiter  # your rate-limiter instance
+from .extensions import limiter
 
 main_blueprint = Blueprint('main', __name__, template_folder='../templates')
 
+
 def is_valid_city(city):
     """Validate the city name to allow letters (including Finnish characters), spaces, and hyphens."""
-    return bool(re.match(r"^[a-zA-ZäöåÄÖÅ\s\-]+$", city))
+    return bool(re.match(r'^[a-zA-ZäöåÄÖÅ\s\-]+$', city))
+
 
 @main_blueprint.route('/')
-@limiter.limit("10 per minute")   # Limit to 10 requests/minute
-@limiter.limit("100 per hour")    # and 100 requests/hour
+@limiter.limit('10 per minute')
+@limiter.limit('100 per hour')
 def index():
-    # 1) Grab the city (or default)
-    city = request.args.get('city', '').strip() \
-           or current_app.config.get('DEFAULT_CITY', 'Helsinki')
-
-    # 2) Tell our session-logging hook what the user searched for
+    city = (
+        request.args.get('city', '').strip()
+        or current_app.config.get('DEFAULT_CITY', 'Helsinki')
+    )
     g.search_location = city
 
-    # 3) Validate city input
     if len(city) > 50:
-        logging.warning(f"City name too long: {city}")
+        logging.warning(f'City name too long: {city}')
         return render_template(
             'index.html',
-            weather={"status":"error",
-                     "message":"The city name you entered is too long. Please enter a shorter name."}
+            weather={
+                'status': 'error',
+                'message': 'The city name you entered is too long. Please enter a shorter name.'
+            }
         )
+
     if not is_valid_city(city):
-        logging.warning(f"Invalid city name: {city}")
+        logging.warning(f'Invalid city name: {city}')
         return render_template(
             'index.html',
-            weather={"status":"error",
-                     "message":"The city name you entered contains invalid characters. Please try again."}
+            weather={
+                'status': 'error',
+                'message': 'The city name you entered contains invalid characters. Please try again.'
+            }
         )
 
-    # 4) Fetch the weather
     weather_response = fetch_weather(city)
+    if weather_response['status'] == 'error':
+        logging.error(
+            f"Error fetching weather for city '{city}': {weather_response['message']}"
+        )
+        return render_template(
+            'index.html',
+            weather=weather_response
+        )
 
-    # 5) Handle API errors
-    if weather_response["status"] == "error":
-        logging.error(f"Error fetching weather for city '{city}': {weather_response['message']}")
-        return render_template('index.html', weather=weather_response)
-
-    # 6) Render the page
-    return render_template('index.html', weather=weather_response, city=city)
+    return render_template(
+        'index.html',
+        weather=weather_response,
+        city=city
+    )
