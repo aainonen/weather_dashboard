@@ -3,3 +3,7 @@ __pycache__/
 *.pyc
 logs/
 .env
+generate_tree.py
+project_tree.txt
+# ignore local compose overrides
+docker-compose.override.yml

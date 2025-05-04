@@ -11,6 +11,7 @@ class SessionMetric(db.Model):
     session_start = db.Column(db.DateTime, default=datetime.utcnow)
     session_end = db.Column(db.DateTime)
     session_duration = db.Column(db.Float)  # In seconds
+    search_location = db.Column(db.Text)  # In seconds
 
     def __repr__(self):
         return f"<SessionMetric {self.id} {self.ip_address}>"
