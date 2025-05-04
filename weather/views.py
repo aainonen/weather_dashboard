@@ -19,8 +19,8 @@ def is_valid_city(city):
 @limiter.limit('100 per hour')
 def index():
     city = (
-        request.args.get('city', '').strip()
-        or current_app.config.get('DEFAULT_CITY', 'Helsinki')
+        request.args.get('city', '').strip() or
+        current_app.config.get('DEFAULT_CITY', 'Helsinki')
     )
     g.search_location = city
 
@@ -30,7 +30,10 @@ def index():
             'index.html',
             weather={
                 'status': 'error',
-                'message': 'The city name you entered is too long. Please enter a shorter name.'
+                'message': (
+                    'The city name you entered is too long. '
+                    'Please enter a shorter name.'
+                )
             }
         )
 
@@ -40,14 +43,18 @@ def index():
             'index.html',
             weather={
                 'status': 'error',
-                'message': 'The city name you entered contains invalid characters. Please try again.'
+                'message': (
+                    'The city name you entered contains invalid characters. '
+                    'Please try again.'
+                )
             }
         )
 
     weather_response = fetch_weather(city)
     if weather_response['status'] == 'error':
         logging.error(
-            f"Error fetching weather for city '{city}': {weather_response['message']}"
+            f"Error fetching weather for city '{city}': "
+            f"{weather_response['message']}"
         )
         return render_template(
             'index.html',
